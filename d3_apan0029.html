@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Programming Exercise 3</title>
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+           
+    </head>
+            
+   <body>                   
+   <script>
+       
+       var tooltip = d3.select("body")
+                        .append("div")
+                        .attr('class', 'tooltip');
+       
+          var canvas = d3.select("body")
+                    .append("svg")
+                    .attr("width",1200)
+                    .attr("height",800)
+          var lines = canvas.attr("class","line")
+         
+       d3.json("data.json", function(data){
+          console.log(data);
+                     
+                 
+        var circles = canvas.selectAll("circle")
+          .data(data.nodes)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d) {return d.x;})
+          .attr("cy", function(d) {return d.y;})
+          .attr("r",   function(d) {
+              var x = 0
+              for (var i = 0; i < data.links.length; i++) {
+             if(data.links[i].node01 == d.id || data.links[i].node02 == d.id)
+              {   x = x + data.links[i].amount }
+
+            }
+              return x/100
+          })
+
+        
+        var lines = canvas.selectAll("line")
+          .data(data.links)
+          .enter()
+          .append("line")
+          .attr("x1", function(d) {
+           for (var i = 0; i < data.nodes.length; i++) {
+             if(data.nodes[i].id == d.node01)
+              { return data.nodes[i].x }
+
+            }
+          })
+        
+         .attr("y1", function(d) {
+           for (var i = 0; i < data.nodes.length; i++) {
+             if(data.nodes[i].id == d.node01)
+              { return data.nodes[i].y }
+
+            }
+          })
+        
+          .attr("x2", function(d) {
+           for (var i = 0; i < data.nodes.length; i++) {
+             if(data.nodes[i].id == d.node02)
+              { return data.nodes[i].x }
+
+            }
+          })
+         
+          .attr("y2", function(d) {
+           for (var i = 0; i < data.nodes.length; i++) {
+             if(data.nodes[i].id == d.node02)
+              { return data.nodes[i].y }
+
+            }
+          })
+        .attr("stroke", "black")
+        .attr("stroke-width", function(d) 
+              { return d.amount/100 })
+
+      circles.on('mouseover', function(d) {
+      console.log("mouseover on", this);
+      d3.selectAll("circle").attr("opacity", 0.2)
+      d3.select(this).attr("opacity", 1)
+      var total_amount = 0
+      var connected_locations = 0
+              for (var i = 0; i < data.links.length; i++) {
+             if(data.links[i].node01 == d.id || data.links[i].node02 == d.id)
+              {   
+                  total_amount = total_amount + data.links[i].amount
+                  connected_locations = connected_locations + 1
+              }
+
+            }
+     
+      tooltip.style("visibility", "visible").text( d.id + ' has ' + total_amount + ' amount of trading and ' + connected_locations + ' connected locations')
+      lines.style('stroke', function (data_link) { return data_link.node01 == d.id || data_link.node02 == d.id ? 'blue' : 'gray';})
+  
+        .transition()
+    })
+            circles.on('mouseout', function(d) {
+                console.log("mouseover off", this);
+            d3.selectAll("circle")
+                .attr("opacity", 1)
+            tooltip.style("visibility","hidden");
+            lines.style('stroke', 'black')
+    })
+        circles.raise();
+});
+   
+       
+        </script>
+    </body>
+</html>
